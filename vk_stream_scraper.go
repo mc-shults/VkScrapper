@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,45 +15,25 @@ import (
 	"time"
 )
 
-type consoleParams struct {
-	host     string
-	key      string
-	mongoURL string
-	help     bool
+type Config struct {
+	Host     string
+	Key      string
+	MongoURL string
 }
 
-var (
-	argv consoleParams
-)
-
-func processArgs() (needStop bool) {
-	needStop = true
-
-	if argv.help {
-		flag.Usage()
-	} else if len(argv.host) == 0 {
-		log.Println("-host is required")
-		flag.Usage()
-	} else if len(argv.key) == 0 {
-		log.Println("-key is required")
-		flag.Usage()
-	} else if len(argv.mongoURL) == 0 {
-		log.Println("-mongo-url is required")
-		flag.Usage()
-	} else {
-		needStop = false
+func check(e error) {
+	if e != nil {
+		log.Fatal("dial error:", e)
 	}
-
-	return
 }
 
-func init() {
-	flag.StringVar(&argv.host, `host`, ``, `streaming api host. REQUIRED`)
-	flag.StringVar(&argv.key, `key`, ``, `client key. REQUIRED`)
-	flag.StringVar(&argv.mongoURL, `mongo-url`, ``, `url of mongodb. REQUIRED`)
-	flag.BoolVar(&argv.help, `h`, false, `show this help`)
+func initConfig(filename string) Config {
+	dat, err := ioutil.ReadFile(filename)
+	check(err)
 
-	flag.Parse()
+	var conf Config
+	json.Unmarshal([]byte(dat), &conf)
+	return conf
 }
 
 func connectVk(streamURL url.URL) (connection *websocket.Conn) {
@@ -134,14 +113,12 @@ func connectMongo(mongoURL string) *mongo.Client {
 }
 
 func main() {
-	if processArgs() {
-		return
-	}
-	streamURL := url.URL{Scheme: "wss", Host: argv.host, Path: "/stream/", RawQuery: "key=" + argv.key}
+	conf := initConfig("config.json")
+	streamURL := url.URL{Scheme: "wss", Host: conf.Host, Path: "/stream/", RawQuery: "key=" + conf.Key}
 	connection := connectVk(streamURL)
 	defer connection.Close()
 
-	db := connectMongo(argv.mongoURL)
+	db := connectMongo(conf.MongoURL)
 	dbPosts := db.Database("big_data").Collection("posts")
 	defer db.Disconnect(context.TODO())
 
