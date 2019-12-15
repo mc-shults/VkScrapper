@@ -5,16 +5,15 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/gorilla/websocket"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/gorilla/websocket"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type consoleParams struct {
@@ -83,13 +82,13 @@ func work(connection *websocket.Conn, done *chan struct{}, dbPosts *mongo.Collec
 			*done <- struct{}{}
 			return
 		}
-		var obj map[string]interface{}
-		json.Unmarshal([]byte(message), &obj)
-		if obj["code"].(float64) != 100 {
+		var responseObj map[string]interface{}
+		json.Unmarshal([]byte(message), &responseObj)
+		if responseObj["code"].(float64) != 100 {
 			log.Printf("recv error: %s", string(message))
 			continue
 		}
-		insertResult, err := dbPosts.InsertOne(context.TODO(), obj)
+		insertResult, err := dbPosts.InsertOne(context.TODO(), responseObj["event"])
 		if err != nil {
 			log.Fatal(err)
 		}
