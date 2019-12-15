@@ -11,7 +11,7 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "env": {},
-            "args": ["-host", "streaming.vk.com", "-key", "9693c34158b261d9b1e9717d3f13e9e023824c9c"]
+            "args": ["-host", "streaming.vk.com", "-key", "9693c34158b261d9b1e9717d3f13e9e023824c9c", "-mongo-url", "mongodb://localhost"]
         }
     ]
 }
