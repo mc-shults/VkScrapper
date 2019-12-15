@@ -20,10 +20,10 @@ import (
 )
 
 type consoleParams struct {
-	host string
-	key  string
+	host     string
+	key      string
 	mongoUrl string
-	help bool
+	help     bool
 }
 
 var (
@@ -85,14 +85,16 @@ func work(connection *websocket.Conn, done *chan struct{}, dbPosts *mongo.Collec
 			*done <- struct{}{}
 			return
 		}
-
 		var obj map[string]interface{}
 		json.Unmarshal([]byte(message), &obj)
+		if obj["code"].(float64) != 100 {
+			log.Printf("recv error: %s", string(message))
+			continue
+		}
 		insertResult, err := dbPosts.InsertOne(context.TODO(), obj)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 		log.Printf("recv: %s", string(message))
 	}
