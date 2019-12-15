@@ -142,7 +142,7 @@ func main() {
 	defer connection.Close()
 
 	db := connectMongo(argv.mongoURL)
-	dbPosts := db.Database("bigdata").Collection("posts")
+	dbPosts := db.Database("big_data").Collection("posts")
 	defer db.Disconnect(context.TODO())
 
 	done := make(chan struct{})
