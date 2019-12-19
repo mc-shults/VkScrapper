@@ -71,7 +71,7 @@ func work(connection *websocket.Conn, done *chan struct{}, dbPosts *mongo.Collec
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+		fmt.Println(time.Now().Format(time.UnixDate), " Inserted a single document: ", insertResult.InsertedID)
 	}
 }
 
