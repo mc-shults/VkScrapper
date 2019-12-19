@@ -72,7 +72,6 @@ func work(connection *websocket.Conn, done *chan struct{}, dbPosts *mongo.Collec
 			log.Fatal(err)
 		}
 		fmt.Println("Inserted a single document: ", insertResult.InsertedID)
-		fmt.Printf("recv: %s", string(message))
 	}
 }
 
